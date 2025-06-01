@@ -6,8 +6,17 @@ from numpy import dot
 from numpy.linalg import norm
 
 
-app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
-app.prepare(ctx_id=0, )
+# app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
+# app.prepare(ctx_id=0, )
+
+_face_app = None
+
+def get_face_app():
+    global _face_app
+    if _face_app is None:
+        _face_app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
+        _face_app.prepare(ctx_id=0)
+    return _face_app
 
 def extract_frame_from_video(video_path):
     cap = cv2.VideoCapture(video_path)
@@ -71,6 +80,8 @@ def get_embedding(image_input, target_size=(224, 224)):
     image_array = np.array(image_resized)
 
     # Run face detection and get embedding
+    app = get_face_app()
+    
     faces = app.get(image_array)
     for face in faces:
         print("Detection score:", face.det_score)
